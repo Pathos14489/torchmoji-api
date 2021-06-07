@@ -32,12 +32,15 @@ def top_elements(array, k):
     ind = np.argpartition(array, -k)[-k:]
     return ind[np.argsort(array[ind])][::-1]
 
+@api.route('/emoji', methods=['GET'])
+def emoji():
+    return json.dumps({"emoji":EMOJIS})
+
 @api.route('/prompt', methods=['POST'])
 def main():
     counter.value += 1
     time_start = datetime.datetime.now()
     data = request.get_json(force=True)
-    print(data)
     prompt = data['prompt']
     # Running predictions
     tokenized, _, _ = st.tokenize_sentences([prompt])
@@ -56,10 +59,10 @@ def main():
         "requestIndex":counter.value,
         "prompt":prompt,
         "generationTime":elapsed_time.total_seconds() * 1000,
-        "emotes":' '.join(emojis),
+        "topEmojis":list(emojis),
+        "probabilities":prob.tolist(),
     }
 
-    print(output)
     return json.dumps(output)
 
 if __name__ == "__main__":
